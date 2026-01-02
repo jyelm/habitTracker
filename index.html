@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Habit Tracker</title>
+</head>
+<body>
+    <h1>Habit Tracker</h1>
+    
+    <div>
+        <input type="text" id="habit-input" placeholder="Enter habit name">
+        <button id="add-button">Add Habit</button>
+    </div>
+    
+    <div id="habit-list">
+        <!-- Habits will appear here -->
+    </div>
+    
+    <script>
+        // JavaScript will go here
+        const habitInput = document.getElementById("habit-input") //html structure is returned by the web browser as a Document Object Model, which can be operated on bthe JS
+        const addButton = document.getElementById("add-button") // these string are given above by the html and accessed by getElementById
+        const habitList = document.getElementById("habit-list") 
+        function loadHabits(){
+            fetch("/api/habits/details")
+            .then(function(response) {return response.json();}) //functionally the same as response => response.json()
+            .then(habits => { // habits in this case is the response
+                habitList.innerHTML = ""; //everything that exists within the html element
+                habits.forEach(habit => {
+                    const div = document.createElement("div"); //create a new html element in memory
+
+                    const nameSpan = document.createElement("span");
+                    const today = new Date().toLocaleDateString('en-CA'); //gets todays date in the right stringed format; why does it use the new keyword?
+                    const completedToday = habit.completed.includes(today); // like in python "date in habit["completed"]"
+                    let description = ""
+                    if (completedToday){ //logic to see if the date "today " exists in association with some exisitng date; only turns green if completed today... how to improve
+                        description += "✓ " + habit.name ; 
+                        nameSpan.style.color = "green";
+                    } else {
+                        description += "o " + habit.name + " ";
+                        nameSpan.style.color = "red";
+                    }
+                    if (habit.maxStreak){
+                        description += " (🔥 " + habit.maxStreak + " day max streak)";
+                    }
+                    nameSpan.textContent = description + " "
+
+                    const completeButton = document.createElement("button");
+                    completeButton.textContent = "Complete";
+
+                    const deleteButton = document.createElement("button");
+                    deleteButton.textContent = "Delete";
+
+                    // closure - a function that remembers variables from when it was created
+                    deleteButton.addEventListener("click", function(){ //must be js syntax for creating a function
+                        fetch("/api/habits", { //fetch is how to make API requests via javascript
+                            method: "DELETE",
+                            headers: {"Content-Type": "application/json"}, //tells the server we are sending a json
+                            body: JSON.stringify({name: habit.name}) //converts the javascript object to a json string
+                        }) //semi colon confusing
+                        .then(response => response.json()) //parses the json back to the javascipt object
+                        .then(data => {
+                            console.log("Delete response: ", data); //data is the returned jsonify from app.py, in particular the route
+                            loadHabits();
+                        });
+                    });                   
+
+                    completeButton.addEventListener("click", function(){ 
+                        fetch("/api/habits/complete", { 
+                            method: "POST",
+                            headers: {"Content-Type": "application/json"}, 
+                            body: JSON.stringify({name: habit.name}) 
+                        }) 
+                        .then(response => response.json()) 
+                        .then(data => {
+                            console.log("Complete instance of a habit on a date: ", data); 
+                            loadHabits();
+                        });
+                    });     
+                    
+                    //maybe issues have to do with this being a nested loop
+                    habit.completed.forEach(date => {
+                        const removeDate = document.createElement("button");
+                        removeDate.textContent = String(date);
+                        removeDate.addEventListener("click", function(){ 
+                        fetch("/api/habits/complete", { 
+                            method: "DELETE",
+                            headers: {"Content-Type": "application/json"}, 
+                            body: JSON.stringify({
+                                name: habit.name,
+                                completed: date}) 
+                        }) 
+                        .then(response => response.json()) 
+                        .then(data => {
+                            console.log("removed an instance of completion: ", data); 
+                            loadHabits();        
+                        });
+                    });   
+                    div.appendChild(removeDate);
+
+                    });
+
+                    div.appendChild(nameSpan);
+                    div.appendChild(completeButton);
+                    div.appendChild(deleteButton);
+                    habitList.appendChild(div);
+
+                });
+
+            });
+        }
+
+        loadHabits()
+
+        addButton.addEventListener("click", function(){ //must be js syntax for creating a function
+            const habitName = habitInput.value;
+            fetch("/api/habits", { //fetch is how to make API requests via javascript
+                method: "POST",
+                headers: {"Content-Type": "application/json"}, //tells the server we are sending a json
+                body: JSON.stringify({name: habitName}) //converts the javascript object to a json string
+            }) //semi colon confusing
+            .then(response => response.json()) //parses the json back to the javascipt object; maybe stringified to print on log
+            .then(data => {
+                console.log("Sever response: ", data); //data is the returned jsonify from app.py, in particular the route
+                habitInput.value = "";
+                loadHabits();
+            });
+        });
+        console.log(habitInput)
+        console.log(addButton) //will be printed on the developer console (F12 on localhost)
+        console.log(habitList)
+    </script>
+</body>
+</html>
