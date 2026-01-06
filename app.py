@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, send_from_directory #converts list of dictionary form to json which is interpretable by webbrowser
-from habit_tracker import HabitTracker, ExistenceError
+from .habit_tracker import HabitTracker, ExistenceError
 
 app = Flask(__name__)
 tracker = HabitTracker()
@@ -61,7 +61,7 @@ def remove_completed_habits():
 @app.route("/api/habits/details", methods = ["GET"]) #information is really being retrieved; isn't the information about the streak being created?
 def get_habit_details():
     detailed_habits = []
-    for habit in tracker.habits:
+    for habit in tracker.getAllHabits():
         habit_details = {
             "name": habit["name"],
             "completed": habit["completed"],

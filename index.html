@@ -14,7 +14,6 @@
     <div id="habit-list">
         <!-- Habits will appear here -->
     </div>
-    
     <script>
         // JavaScript will go here
         const habitInput = document.getElementById("habit-input") //html structure is returned by the web browser as a Document Object Model, which can be operated on bthe JS
@@ -120,7 +119,7 @@
             }) //semi colon confusing
             .then(response => response.json()) //parses the json back to the javascipt object; maybe stringified to print on log
             .then(data => {
-                console.log("Sever response: ", data); //data is the returned jsonify from app.py, in particular the route
+                console.log("Server response: ", data); //data is the returned jsonify from app.py, in particular the route
                 habitInput.value = "";
                 loadHabits();
             });
