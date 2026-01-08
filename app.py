@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, send_from_directory #converts list of dictionary form to json which is interpretable by webbrowser
-from .habit_tracker import HabitTracker, ExistenceError
+from habit_tracker import HabitTracker, ExistenceError #MIGHT NEED TO REMOVE "."
 
-app = Flask(__name__)
+app = Flask(__name__) #Procfile would have different naming convention if this was named other than app and the file was named something other than app
 tracker = HabitTracker()
 
 #what does this do?

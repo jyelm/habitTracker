@@ -1,6 +1,6 @@
 import json
 from datetime import datetime, date, timedelta
-from .database import get_connection #since this is now being run as a package the do indicates this can be found in the same directory as this file
+from database import get_connection #since this is now being run as a package the do indicates this can be found in the same directory as this file
 from collections import defaultdict
 
 class ExistenceError(Exception):
