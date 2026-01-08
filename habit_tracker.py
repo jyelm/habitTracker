@@ -253,43 +253,43 @@ class HabitTracker():
         return list(habits.values())
     
     def completedHabit(self, habitName):
-        conn = get_connection()
-        cursor = conn.cursor()
-        
-        # Step 1: Get the habit's id
-        cursor.execute("SELECT id FROM habits WHERE name = %s", (habitName,))
-        habit = cursor.fetchone()
-        
-        if habit is None:
-            cursor.close()
-            conn.close()
-            raise ExistenceError("This habit does not exist!")
-        
-        habit_id = habit[0]  # Extract id from tuple
-        
-        # Step 2: Get today's date
-        today = datetime.date().now()# Your code here - get today's date in ISO format; should be able to take date object
-        
-        # Step 3: Check if already completed today
-        # Your code here - SELECT from completions
-
-        cursor.execute("SELECT habit_id FROM completions WHERE habit_id = %s", (habit_id,))
-        completed_dates = cursor.fetchall()
-
-        for date in completed_dates:
-            if date[2] == today:
-                raise ExistenceError("This habit has already been completed!")
+        with get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id FROM habits WHERE name = %s", (habitName,)) #select from the id column of the habits datatable where the name is the value of this placeholder
+                habit_id_tuple = cursor.fetchone() #should be a tuple with one element
+                if habit_id_tuple is None:
+                    raise ExistenceError("This habit doesn't exist!")
+                habit_id = habit_id_tuple[0]
+                date_today = date.today() 
+                cursor.execute("SELECT id FROM completions WHERE habit_id = %s AND completed_date = %s", 
+                               (habit_id, date_today)) #select id since it is guranteed to be unique; maybe use "where keyword" when specifying column name
+                exists = cursor.fetchone()
+                if exists:
+                    raise ExistenceError("This habit has already been completed!")
+                cursor.execute("INSERT INTO completions (habit_id, completed_date) VALUES (%s, %s)", (habit_id, date_today))
+                conn.commit()                
             
+    def removeComplete(self, habitName, dateToRemove):
+        with get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id FROM habits WHERE name = %s", (habitName,))
+                habit_id_tuple = cursor.fetchone() 
+                if habit_id_tuple is None:
+                    raise ExistenceError("This habit doesn't exist!")
+                habit_id = habit_id_tuple[0]
+                cursor.execute("SELECT id FROM completions WHERE habit_id = %s AND completed_date = %s", 
+                               (habit_id, dateToRemove))
+                to_remove = cursor.fetchone()
+                if not to_remove:
+                    raise ExistenceError("This date doesn't exist!")
+                cursor.execute("DELETE FROM completions WHERE habit_id = %s AND completed_date = %s", (habit_id, dateToRemove))
+                conn.commit() 
 
-
-        # Step 4: If not already completed, INSERT
-        # Your code here
-        cursor.execute("INSERT INTO completions (%s, %s)", (habit_id, today))
-        
-        conn.commit()
-        cursor.close()
-        conn.close()
-     
+    def clear(self):
+        with get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("DELETE FROM habits") #should cascade and delete from completions aswell
+                conn.commit()
     
     def _maxStreak(self, entry):
         listDates = entry["completed"]

@@ -9,7 +9,7 @@ TEST_URL = "http://localhost:5000/api/habits/test-streak"
 
 # requests.post(CLEAR_URL)
 # requests.post(BASE_URL, json={"name": "TestHabit"}) #specify the request with method and URL
-requests.post(TEST_URL)
+requests.post(CLEAR_URL)
 response = requests.get(DETAILS_URL)
 print(response.json())
 

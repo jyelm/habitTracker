@@ -11,7 +11,7 @@ def serve_frontend():
 
 @app.route("/api/habits", methods = ["GET"]) #"When someone asks for the habit list, just give it to them; retrieve the data and return the information to the user"
 def get_habits(): #may be a naming convention conflict
-    return jsonify(tracker.habits) #simple member variable accessing
+    return jsonify(tracker.getAllHabits()) #simple member variable accessing
 
 @app.route("/api/habits/clear", methods = ["POST"]) #2 different functions cannot have the same route and method
 def clear_habits(): 
@@ -71,16 +71,18 @@ def get_habit_details():
         detailed_habits.append(habit_details)
     return(jsonify(detailed_habits))
 
-@app.route("/api/habits/test-streak", methods=["POST"]) #flow - server started, tracker object created, load data run, so this endpoint needs to be made to    
-def test_streak_setup():                                #reload the reading of data.txt if modified for testing purposes
-    # Clear and set up test data
-    tracker.clear()
-    tracker.habits = [
-        {"name": "Exercise", "completed": ["2025-01-15", "2025-01-16", "2025-01-17"]},
-        {"name": "Read", "completed": ["2025-01-10"]}
-    ]
-    tracker._saveData()
-    return jsonify({"success": True, "message": "Test data loaded"})
+
+# # --TO BE MODIFIED TO SQL QUERY--
+# @app.route("/api/habits/test-streak", methods=["POST"]) #flow - server started, tracker object created, load data run, so this endpoint needs to be made to    
+# def test_streak_setup():                                #reload the reading of data.txt if modified for testing purposes
+#     # Clear and set up test data
+#     tracker.clear()
+#     tracker.habits = [
+#         {"name": "Exercise", "completed": ["2025-01-15", "2025-01-16", "2025-01-17"]},
+#         {"name": "Read", "completed": ["2025-01-10"]}
+#     ]
+#     tracker._saveData()
+#     return jsonify({"success": True, "message": "Test data loaded"})
 
       
 if __name__ == "__main__":
