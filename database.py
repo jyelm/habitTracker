@@ -7,7 +7,7 @@ load_dotenv()  # Loads variables from .env file; these variables are hidden (lik
 def get_connection():
     database_url = os.environ.get("DATABASE_URL")
     if database_url:
-        return psycopg2.connect(database_url)
+        return psycopg2.connect(database_url, sslmode = 'require')
     return psycopg2.connect(
         host=os.environ.get("DB_HOST", "localhost"),
         database=os.environ.get("DB_NAME", "habit_tracker"),
