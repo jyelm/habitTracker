@@ -3,7 +3,7 @@ import psycopg2
 from dotenv import load_dotenv
 
 load_dotenv()  # Loads variables from .env file; these variables are hidden (like database password)
-
+               # REQUIRES NODE JS INSTALLATION!!! 
 def get_connection():
     database_url = os.environ.get("DATABASE_URL")
     if database_url:
